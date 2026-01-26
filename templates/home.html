@@ -1,0 +1,1797 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - Grocery List App</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/demo.css') }}"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: #f5f5f5;
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      /* CREATE/EDIT LIST VIEW */
+      .create-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: none;
+        max-height: 100vh; /* ADD THIS */
+        overflow-y: auto;
+      }
+
+      .create-container.active {
+        display: block;
+      }
+
+      .create-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      .create-container::-webkit-scrollbar-thumb {
+        background: #ff0057;
+        border-radius: 10px;
+      }
+
+      .create-container::-webkit-scrollbar-thumb:hover {
+        background: #cc0044;
+      }
+
+      .back-btn {
+        background: #999;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+
+      .back-btn:hover {
+        background: #777;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      /* CATALOG SECTION - SCROLLABLE */
+      .catalog-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
+        max-height: 450px;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      /* Scrollbar styling */
+      .catalog-section::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .catalog-section::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      .catalog-section::-webkit-scrollbar-thumb {
+        background: #ff0057;
+        border-radius: 10px;
+      }
+
+      .catalog-section::-webkit-scrollbar-thumb:hover {
+        background: #cc0044;
+      }
+
+      .category-box {
+        background: #fff;
+        border: 2px solid #fffd44;
+        border-radius: 10px;
+        padding: 15px;
+        height: fit-content;
+      }
+
+      .category-box h4 {
+        margin: 0 0 15px 0;
+        color: #ff0057;
+        border-bottom: 2px solid #ff0057;
+        padding-bottom: 10px;
+        text-align: center;
+        font-size: 1em;
+      }
+
+      .item-checkbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 8px;
+      }
+
+      .item-checkbox:last-child {
+        margin-bottom: 0;
+      }
+
+      .item-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .item-checkbox label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: normal;
+        flex: 1;
+        font-size: 0.95em;
+      }
+
+      /* SEARCH BOX */
+      .search-box {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 10px;
+        border: 1px solid #eee;
+      }
+
+      .search-box h4 {
+        margin: 0 0 10px 0;
+        color: #ff0057;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        font-size: 1em;
+      }
+
+      .search-box small {
+        display: block;
+        color: #999;
+        font-size: 0.9em;
+      }
+
+      /* ITEMS SECTION - Two Column Layout */
+      .items-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .selected-items {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+        background: #f9f9f9;
+      }
+
+      .selected-items::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .selected-items::-webkit-scrollbar-thumb {
+        background: #fffd44;
+        border-radius: 5px;
+      }
+
+      .item-row {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        gap: 10px;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 8px;
+      }
+
+      .item-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+      }
+
+      .item-row .item-name {
+        flex: 1;
+        font-weight: bold;
+        color: #333;
+        min-width: 100px;
+      }
+
+      .item-qty {
+        display: flex;
+        gap: 5px;
+        width: 140px;
+      }
+
+      .item-qty input {
+        width: 55px;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+
+      .item-qty select {
+        width: 65px;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 0.8em;
+      }
+
+      .remove-item-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8em;
+        flex-shrink: 0;
+      }
+
+      .remove-item-btn:hover {
+        background: #cc0000;
+      }
+
+      /* SUMMARY BOX */
+      .summary-box {
+        background: #f9f9f9;
+        border: 2px solid #ff0057;
+        border-radius: 10px;
+        padding: 15px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+      }
+
+      .summary-box h3 {
+        margin: 0 0 15px 0;
+        color: #ff0057;
+        text-align: center;
+        font-size: 1.1em;
+      }
+
+      .summary-items {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+      }
+
+      .summary-items::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .summary-items::-webkit-scrollbar-thumb {
+        background: #ff0057;
+        border-radius: 5px;
+      }
+
+      .summary-item {
+        padding: 8px;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        border-left: 3px solid #32cd32;
+      }
+
+      .summary-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .summary-item .item-name {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .summary-item .item-detail {
+        color: #666;
+        font-size: 0.85em;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1em;
+        transition: 0.3s;
+      }
+
+      .save-btn {
+        background: #fffd44;
+        color: #ff0057;
+      }
+
+      .save-btn:hover {
+        background: #fff400;
+        transform: scale(1.02);
+      }
+
+      .send-btn {
+        background: linear-gradient(45deg, #32cd32, #228b22);
+        color: white;
+      }
+
+      .send-btn:hover {
+        transform: scale(1.02);
+      }
+
+      /* DASHBOARD VIEW */
+      .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ff0057;
+        padding-bottom: 15px;
+      }
+
+      .header h1 {
+        color: #ff0057;
+        margin: 0;
+        font-size: 2em;
+      }
+
+      .header .logout-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .header .logout-btn:hover {
+        background: #cc0000;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        background: #fffd44;
+        color: #ff0057;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .tab:hover,
+      .tab.active {
+        background: #ff0057;
+        color: white;
+      }
+
+      .create-btn {
+        background: linear-gradient(45deg, #32cd32, #228b22);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+
+      .create-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .lists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .list-card {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #ff0057;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .list-card:hover {
+        box-shadow: 0 4px 12px rgba(255, 0, 87, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .list-card h3 {
+        margin: 0 0 8px 0;
+        color: #ff0057;
+      }
+
+      .list-card .status {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #fffd44;
+        color: #ff0057;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: bold;
+      }
+
+      .list-card .delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8em;
+        display: none;
+      }
+
+      .list-card:hover .delete-btn {
+        display: block;
+      }
+
+      .list-card .delete-btn:hover {
+        background: #cc0000;
+      }
+
+      .empty-message {
+        text-align: center;
+        color: #999;
+        padding: 40px 20px;
+        font-style: italic;
+      }
+
+      @media (max-width: 768px) {
+        .items-section,
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-box {
+          position: static;
+        }
+
+        .catalog-section {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          max-height: 600px;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: #f5f5f5;
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      /* DASHBOARD VIEW */
+      .dashboard-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ff0057;
+        padding-bottom: 15px;
+      }
+
+      .header h1 {
+        color: #ff0057;
+        margin: 0;
+        font-size: 2em;
+      }
+
+      .header .logout-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .header .logout-btn:hover {
+        background: #cc0000;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        background: #fffd44;
+        color: #ff0057;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .tab:hover,
+      .tab.active {
+        background: #ff0057;
+        color: white;
+      }
+
+      .create-btn {
+        background: linear-gradient(45deg, #32cd32, #228b22);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+
+      .create-btn:hover {
+        transform: scale(1.05);
+      }
+
+      .lists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .list-card {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #ff0057;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .list-card:hover {
+        box-shadow: 0 4px 12px rgba(255, 0, 87, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .list-card h3 {
+        margin: 0 0 8px 0;
+        color: #ff0057;
+      }
+
+      .list-card .status {
+        display: inline-block;
+        padding: 4px 12px;
+        background: #fffd44;
+        color: #ff0057;
+        border-radius: 12px;
+        font-size: 0.85em;
+        font-weight: bold;
+      }
+
+      .list-card .delete-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.8em;
+        display: none;
+      }
+
+      .list-card:hover .delete-btn {
+        display: block;
+      }
+
+      .list-card .delete-btn:hover {
+        background: #cc0000;
+      }
+
+      .empty-message {
+        text-align: center;
+        color: #999;
+        padding: 40px 20px;
+        font-style: italic;
+      }
+
+      /* CREATE/EDIT LIST VIEW */
+      .create-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+
+      .create-container.active {
+        display: block;
+      }
+
+      .back-btn {
+        background: #999;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: 0.3s;
+      }
+
+      .back-btn:hover {
+        background: #777;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .catalog-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .category-box {
+        background: #f9f9f9;
+        border: 2px solid #fffd44;
+        border-radius: 10px;
+        padding: 15px;
+      }
+
+      .category-box h4 {
+        margin: 0 0 15px 0;
+        color: #ff0057;
+        border-bottom: 2px solid #ff0057;
+        padding-bottom: 10px;
+        text-align: center;
+      }
+
+      .item-checkbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 8px;
+      }
+
+      .item-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+
+      .item-checkbox label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: normal;
+        flex: 1;
+      }
+
+      .items-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .selected-items {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .item-row {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        gap: 10px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        margin-bottom: 8px;
+      }
+
+      .item-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .item-row .item-name {
+        flex: 1;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .item-qty {
+        display: flex;
+        gap: 5px;
+        width: 140px;
+      }
+
+      .item-qty input {
+        width: 55px;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+
+      .item-qty select {
+        width: 65px;
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+
+      .remove-item-btn {
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.8em;
+      }
+
+      .remove-item-btn:hover {
+        background: #cc0000;
+      }
+
+      .summary-box {
+        background: #f9f9f9;
+        border: 2px solid #ff0057;
+        border-radius: 10px;
+        padding: 15px;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+      }
+
+      .summary-box h3 {
+        margin: 0 0 15px 0;
+        color: #ff0057;
+        text-align: center;
+      }
+
+      .summary-items {
+        max-height: 250px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+      }
+
+      .summary-item {
+        padding: 8px;
+        background: white;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        font-size: 0.9em;
+        border-left: 3px solid #32cd32;
+      }
+
+      .summary-item .item-name {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .summary-item .item-detail {
+        color: #666;
+        font-size: 0.85em;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .action-buttons button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1em;
+        transition: 0.3s;
+      }
+
+      .save-btn {
+        background: #fffd44;
+        color: #ff0057;
+      }
+
+      .save-btn:hover {
+        background: #fff400;
+        transform: scale(1.02);
+      }
+
+      .send-btn {
+        background: linear-gradient(45deg, #32cd32, #228b22);
+        color: white;
+      }
+
+      .send-btn:hover {
+        transform: scale(1.02);
+      }
+
+      .search-box {
+        margin-top: 30px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 10px;
+      }
+
+      .search-box h4 {
+        margin-top: 0;
+        color: #ff0057;
+      }
+
+      .search-box input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .items-section,
+        .two-col,
+        .catalog-section {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-box {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="dashboard-container">
+      <div class="header">
+        <h1>🛒 Grocery Lists</h1>
+        <div style="display: flex; gap: 10px; align-items: center">
+          <button
+            class="logout-btn"
+            onclick="window.location.href = 'feedback.html'"
+            style="
+              background: #fffd44;
+              color: #ff0057;
+              border: 2px solid #ff0057;
+            "
+          >
+            💬 Feedback
+          </button>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <p
+        style="
+          text-align: center;
+          color: #228b22;
+          font-style: italic;
+          margin-bottom: 20px;
+        "
+      >
+        Welcome, <strong id="username-display">{{ username }}</strong>!
+        Paperless shopping lists saving trees 🌱
+      </p>
+
+      <button class="create-btn" onclick="openCreateList()">
+        + Create New List
+      </button>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('sent')">
+          Sent Lists
+        </button>
+        <button class="tab" onclick="switchTab('received')">Received</button>
+        <button class="tab" onclick="switchTab('drafts')">Drafts</button>
+      </div>
+
+      <div id="sent-view" class="tab-content">
+        <div class="lists-grid" id="sent-lists"></div>
+      </div>
+
+      <div id="received-view" class="tab-content" style="display: none">
+        <div class="lists-grid" id="received-lists"></div>
+      </div>
+
+      <div id="drafts-view" class="tab-content" style="display: none">
+        <div class="lists-grid" id="drafts-lists"></div>
+      </div>
+    </div>
+
+    <!-- CREATE/EDIT LIST VIEW -->
+    <div id="create-view" class="create-container">
+      <button class="back-btn" onclick="backToDashboard()">
+        ← Back to Dashboard
+      </button>
+
+      <h2 style="color: #ff0057; margin-top: 0">Create Grocery List</h2>
+
+      <div class="form-group">
+        <label>List Title</label>
+        <input
+          type="text"
+          id="list-title"
+          placeholder="e.g., Weekly Groceries"
+        />
+      </div>
+
+      <div class="two-col">
+        <div class="form-group">
+          <label>From (Sender) - You</label>
+          <input type="text" id="sender-name" readonly />
+        </div>
+
+        <div class="form-group">
+          <label>To (Receiver) *</label>
+          <select id="receiver-name">
+            <option value="">-- Select recipient --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CATALOG SECTION -->
+      <h3 style="color: #ff0057; margin-top: 30px; margin-bottom: 20px">
+        📦 Select Items from Catalog
+      </h3>
+
+      <div class="catalog-section" id="catalog-container">
+        <!-- Will be populated by JavaScript -->
+      </div>
+
+      <!-- SEARCH CUSTOM ITEMS -->
+      <div class="search-box">
+        <h4>🔍 Add Custom Item</h4>
+        <input
+          type="text"
+          id="search-items"
+          placeholder="Type item name and press Enter to add custom item..."
+        />
+        <small style="color: #999"
+          >Or add items from the categories above</small
+        >
+      </div>
+
+      <!-- SELECTED ITEMS & SUMMARY -->
+      <div class="items-section">
+        <!-- LEFT: Selected Items with Qty -->
+        <div>
+          <h3 style="color: #ff0057; margin-top: 0">📋 Selected Items</h3>
+          <div class="selected-items" id="selected-items">
+            <p style="text-align: center; color: #999">
+              No items selected yet. Choose from catalog above.
+            </p>
+          </div>
+        </div>
+
+        <!-- RIGHT: Summary Box -->
+        <div class="summary-box">
+          <h3>✓ Summary</h3>
+          <div class="summary-items" id="summary-items">
+            <p style="text-align: center; color: #999; margin: 0">
+              Select items to see summary
+            </p>
+          </div>
+          <div class="action-buttons">
+            <button class="save-btn" onclick="saveForLater()">
+              💾 Save for Later
+            </button>
+            <button class="send-btn" onclick="sendList()">📤 Send List</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let currentListId = null;
+      let items = [];
+      let allUsers = [];
+      let catalog = {};
+      let receiverCheckedItems = {};
+
+      // Initialize
+      async function init() {
+        await loadUsers();
+        await loadCatalog();
+        await loadLists("sent");
+      }
+
+      // Load catalog
+      async function loadCatalog() {
+        const res = await fetch("/api/catalog");
+        const data = await res.json().catch(() => ({ ok: false }));
+
+        if (data.ok) {
+          catalog = data.catalog;
+        }
+      }
+
+      // Render catalog on create page
+      function renderCatalog() {
+        const container = document.getElementById("catalog-container");
+        if (!Object.keys(catalog).length) return;
+
+        container.innerHTML = Object.entries(catalog)
+          .map(
+            ([category, itemList]) => `
+        <div class="category-box">
+          <h4>${category}</h4>
+          ${itemList
+            .map(
+              (item) => `
+            <div class="item-checkbox">
+              <input type="checkbox" id="item-${item}" 
+                     onchange="toggleCatalogItem('${item}', this.checked)">
+              <label for="item-${item}">${item}</label>
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      // Toggle catalog item
+      function toggleCatalogItem(itemName, checked) {
+        if (checked) {
+          const exists = items.find(
+            (i) => i.name.toLowerCase() === itemName.toLowerCase(),
+          );
+          if (!exists) {
+            items.push({
+              id: Date.now() + Math.random(),
+              name: itemName,
+              qty: 1,
+              unit: "kg",
+            });
+          }
+        } else {
+          items = items.filter(
+            (i) => i.name.toLowerCase() !== itemName.toLowerCase(),
+          );
+        }
+        renderSelectedItems();
+      }
+
+      // Load all users
+      async function loadUsers() {
+        const res = await fetch("/api/users");
+        const data = await res.json().catch(() => ({ ok: false }));
+
+        if (data.ok) {
+          allUsers = data.users;
+          const select = document.getElementById("receiver-name");
+          select.innerHTML = '<option value="">-- Select recipient --</option>';
+          allUsers.forEach((user) => {
+            const opt = document.createElement("option");
+            opt.value = user.id;
+            opt.textContent = user.username;
+            select.appendChild(opt);
+          });
+        }
+      }
+
+      // Load lists by type
+      async function loadLists(type) {
+        const res = await fetch(`/api/groceries/${type}`);
+        const data = await res.json().catch(() => ({ ok: false }));
+
+        const container = document.getElementById(`${type}-lists`);
+        if (!data.ok || !data.lists || data.lists.length === 0) {
+          container.innerHTML = `<div class="empty-message">No ${type} lists yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = data.lists
+          .map(
+            (list) => `
+        <div class="list-card" onclick="openListDetail(${list.id}, '${type}')">
+          <h3>${list.title}</h3>
+          ${
+            type === "drafts"
+              ? `<button class="delete-btn" onclick="deleteList(${list.id}, event)">🗑️ Delete</button>`
+              : ""
+          }
+          <span class="status">${list.status}</span>
+          <p style="margin: 10px 0 0 0; color: #666; font-size: 0.9em;">${list.items.length} items</p>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      // Delete draft list
+      async function deleteList(listId, event) {
+        event.stopPropagation();
+
+        if (!confirm("Are you sure you want to delete this list?")) return;
+
+        const res = await fetch(`/api/groceries/${listId}`, {
+          method: "DELETE",
+        });
+
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (data.ok) {
+          alert("List deleted!");
+          loadLists("drafts");
+        } else {
+          alert(data.message || "Failed to delete");
+        }
+      }
+
+      // Switch tabs
+      function switchTab(type) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        event.target.classList.add("active");
+
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((t) => (t.style.display = "none"));
+        document.getElementById(`${type}-view`).style.display = "block";
+
+        loadLists(type);
+      }
+
+      // Open create form
+      function openCreateList() {
+        currentListId = null;
+        items = [];
+        document.getElementById("list-title").value = "";
+        document.getElementById("receiver-name").value = "";
+        document.getElementById("search-items").value = "";
+
+        document
+          .querySelectorAll('input[type="checkbox"][id^="item-"]')
+          .forEach((cb) => {
+            cb.checked = false;
+          });
+
+        renderSelectedItems();
+
+        document.getElementById("dashboard-view").style.display = "none";
+        document.getElementById("create-view").classList.add("active");
+
+        const username =
+          document.getElementById("username-display").textContent;
+        document.getElementById("sender-name").value = username;
+      }
+
+      // Open list detail - UPDATED WITH RECEIVER CHECKOUT
+      async function openListDetail(listId, type = null) {
+        currentListId = listId;
+        const res = await fetch(`/api/groceries/${listId}`);
+        const data = await res.json().catch(() => ({ ok: false }));
+
+        if (!data.ok) {
+          alert("Failed to load list");
+          return;
+        }
+
+        const list = data.list;
+
+        // Receiver checkout view
+        if (list.list_type === "received" || type === "received") {
+          renderReceiverCheckoutView(list);
+        }
+        // Sender viewing completed list
+        else if (list.list_type === "sent" && list.status === "Done") {
+          renderSenderCompletedView(list);
+        }
+        // Draft or sent - edit mode
+        else {
+          document.getElementById("list-title").value = list.title;
+          document.getElementById("receiver-name").value =
+            list.receiver_id || "";
+          items = list.items || [];
+
+          document
+            .querySelectorAll('input[type="checkbox"][id^="item-"]')
+            .forEach((cb) => {
+              cb.checked = false;
+            });
+
+          items.forEach((item) => {
+            const checkbox = document.getElementById(`item-${item.name}`);
+            if (checkbox) {
+              checkbox.checked = true;
+            }
+          });
+
+          renderSelectedItems();
+
+          document.getElementById("dashboard-view").style.display = "none";
+          document.getElementById("create-view").classList.add("active");
+        }
+      }
+
+      // NEW: Render receiver checkout view
+      function renderReceiverCheckoutView(list) {
+        const isDone = list.status === "Done";
+
+        let collectedHTML = "";
+        let notAvailableHTML = "";
+
+        list.items.forEach((item) => {
+          const isChecked = item.checked || false;
+          const price = item.price || "";
+
+          const itemHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: white; margin-bottom: 8px; border-radius: 5px;">
+              <input type="checkbox" class="item-checkbox" 
+                     onchange="updateReceiverItem('${item.name}', this.checked, document.getElementById('price-${item.id}')?.value || '')"
+                     ${isDone ? "disabled" : ""} ${isChecked ? "checked" : ""}
+                     style="width: 20px; height: 20px; cursor: pointer;">
+              <div style="flex: 1;">
+                <div style="font-weight: bold; color: #333;">${item.name}</div>
+                <div style="font-size: 0.9em; color: #666;">${item.qty} ${item.unit}</div>
+              </div>
+              <input type="number" id="price-${item.id}" class="price-input" placeholder="₹" 
+                     value="${price}" step="0.5"
+                     onchange="updateReceiverItem('${item.name}', ${isChecked}, this.value)"
+                     ${isDone ? "disabled" : ""}
+                     style="width: 80px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+          `;
+
+          if (isChecked) {
+            collectedHTML += itemHTML;
+          } else {
+            notAvailableHTML += itemHTML;
+          }
+        });
+
+        const viewHTML = `
+          <div style="max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px;">
+            <button class="back-btn" onclick="backToDashboard()" style="margin-bottom: 20px;">← Back</button>
+            
+            <h2 style="color: #ff0057; margin-top: 0;">${list.title}</h2>
+            <p style="color: #666; margin: 10px 0 20px 0;">Status: <span style="background: ${isDone ? "#d4edda" : "#fff3cd"}; padding: 4px 12px; border-radius: 12px; font-weight: bold; color: ${isDone ? "#155724" : "#856404"}">${list.status}</span></p>
+
+            ${
+              collectedHTML
+                ? `
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 3px solid #4CAF50;">
+                <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 15px;">✅ Collected Items</div>
+                <div style="border: 2px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                  ${collectedHTML}
+                </div>
+              </div>
+            `
+                : ""
+            }
+
+            ${
+              notAvailableHTML
+                ? `
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 3px solid #f44336;">
+                <div style="font-size: 18px; font-weight: bold; color: #f44336; margin-bottom: 15px;">❌ Not Available</div>
+                <div style="border: 2px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                  ${notAvailableHTML}
+                </div>
+              </div>
+            `
+                : ""
+            }
+
+            ${
+              !isDone
+                ? `
+              <button onclick="markListDone(${list.id})" style="margin-top: 20px; background: #4CAF50; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">✅ Mark as Done</button>
+            `
+                : `
+              <p style="color: #4CAF50; font-weight: bold; margin-top: 20px;">✓ List completed and saved to CSV</p>
+            `
+            }
+          </div>
+        `;
+
+        const tempContainer = document.createElement("div");
+        tempContainer.id = "receiver-view";
+        tempContainer.innerHTML = viewHTML;
+
+        document.getElementById("dashboard-view").style.display = "none";
+        document.getElementById("create-view").classList.remove("active");
+
+        const oldView = document.getElementById("receiver-view");
+        if (oldView) oldView.remove();
+
+        document.body.appendChild(tempContainer);
+      }
+
+      // NEW: Update receiver item
+      function updateReceiverItem(itemName, isChecked, price) {
+        if (!receiverCheckedItems[itemName]) {
+          receiverCheckedItems[itemName] = {};
+        }
+        receiverCheckedItems[itemName].checked = isChecked;
+        receiverCheckedItems[itemName].price = price || 0;
+      }
+
+      // NEW: Mark list as done
+      async function markListDone(listId) {
+        const checkedArray = Object.entries(receiverCheckedItems).map(
+          ([name, data]) => ({
+            name,
+            checked: data.checked || false,
+            price: data.price || 0,
+          }),
+        );
+
+        const res = await fetch(`/api/groceries/mark-done/${listId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checked_items: checkedArray }),
+        });
+
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (data.ok) {
+          alert("✅ List marked as done! CSV saved for future reference.");
+          receiverCheckedItems = {};
+
+          const receiverView = document.getElementById("receiver-view");
+          if (receiverView) receiverView.remove();
+
+          backToDashboard();
+        } else {
+          alert(data.message || "Failed to save");
+        }
+      }
+
+      // NEW: Render sender completed view
+      function renderSenderCompletedView(list) {
+        let collectedHTML = "";
+        let notAvailableHTML = "";
+
+        list.items.forEach((item) => {
+          const isChecked = item.checked || false;
+          const price = item.price || "";
+
+          const itemHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px; background: white; margin-bottom: 8px; border-radius: 5px;">
+              <div style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                ${isChecked ? "✅" : "❌"}
+              </div>
+              <div style="flex: 1;">
+                <div style="font-weight: bold; color: #333;">${item.name}</div>
+                <div style="font-size: 0.9em; color: #666;">${item.qty} ${item.unit}</div>
+              </div>
+              ${price ? `<div style="width: 80px; text-align: center; font-weight: bold;">₹${price}</div>` : ""}
+            </div>
+          `;
+
+          if (isChecked) {
+            collectedHTML += itemHTML;
+          } else {
+            notAvailableHTML += itemHTML;
+          }
+        });
+
+        const viewHTML = `
+          <div style="max-width: 800px; margin: 0 auto; background: #f0f0f0; padding: 20px; border-radius: 10px;">
+            <button class="back-btn" onclick="backToDashboard()" style="margin-bottom: 20px;">← Back</button>
+            
+            <h2 style="color: #ff0057; margin-top: 0;">${list.title}</h2>
+            <p style="color: #666; margin: 10px 0 20px 0;">Status: <span style="background: #d4edda; padding: 4px 12px; border-radius: 12px; font-weight: bold; color: #155724;">Completed</span></p>
+
+            ${
+              collectedHTML
+                ? `
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 3px solid #4CAF50;">
+                <div style="font-size: 18px; font-weight: bold; color: #4CAF50; margin-bottom: 15px;">✅ Collected by Receiver</div>
+                <div style="border: 2px solid #ddd; padding: 15px; border-radius: 8px; background: white;">
+                  ${collectedHTML}
+                </div>
+              </div>
+            `
+                : ""
+            }
+
+            ${
+              notAvailableHTML
+                ? `
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 3px solid #f44336;">
+                <div style="font-size: 18px; font-weight: bold; color: #f44336; margin-bottom: 15px;">❌ Not Available</div>
+                <div style="border: 2px solid #ddd; padding: 15px; border-radius: 8px; background: white;">
+                  ${notAvailableHTML}
+                </div>
+              </div>
+            `
+                : ""
+            }
+
+            <p style="color: #4CAF50; font-weight: bold; margin-top: 20px;">✓ List completed. Receiver has submitted their response.</p>
+          </div>
+        `;
+
+        const tempContainer = document.createElement("div");
+        tempContainer.id = "receiver-view";
+        tempContainer.innerHTML = viewHTML;
+
+        document.getElementById("dashboard-view").style.display = "none";
+        document.getElementById("create-view").classList.remove("active");
+
+        const oldView = document.getElementById("receiver-view");
+        if (oldView) oldView.remove();
+
+        document.body.appendChild(tempContainer);
+      }
+
+      // Back to dashboard
+      function backToDashboard() {
+        document.getElementById("create-view").classList.remove("active");
+        document.getElementById("dashboard-view").style.display = "block";
+
+        const receiverView = document.getElementById("receiver-view");
+        if (receiverView) receiverView.remove();
+
+        loadLists("sent");
+      }
+
+      // Add custom item
+      document
+        .getElementById("search-items")
+        .addEventListener("keypress", (e) => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+
+          const itemName = e.target.value.trim();
+          if (!itemName) return;
+
+          const exists = items.find(
+            (i) => i.name.toLowerCase() === itemName.toLowerCase(),
+          );
+          if (!exists) {
+            items.push({
+              id: Date.now(),
+              name: itemName,
+              qty: 1,
+              unit: "kg",
+            });
+            renderSelectedItems();
+          }
+
+          e.target.value = "";
+        });
+
+      // Render selected items
+      function renderSelectedItems() {
+        const container = document.getElementById("selected-items");
+
+        if (items.length === 0) {
+          container.innerHTML =
+            '<p style="text-align:center;color:#999;">No items selected yet. Choose from catalog above.</p>';
+          renderSummary();
+          return;
+        }
+
+        container.innerHTML = items
+          .map(
+            (item) => `
+        <div class="item-row">
+          <span class="item-name">${item.name}</span>
+          <div class="item-qty">
+            <input type="number" value="${item.qty}" min="0.5" step="0.5"
+                   onchange="updateQty(${item.id}, this.value)">
+            <select onchange="updateUnit(${item.id}, this.value)">
+              <option ${item.unit === "kg" ? "selected" : ""}>kg</option>
+              <option ${item.unit === "gm" ? "selected" : ""}>gm</option>
+              <option ${item.unit === "lt" ? "selected" : ""}>lt</option>
+              <option ${item.unit === "ml" ? "selected" : ""}>ml</option>
+              <option ${item.unit === "pc" ? "selected" : ""}>pc</option>
+            </select>
+          </div>
+          <button class="remove-item-btn" onclick="removeItem(${item.id})">✕</button>
+        </div>
+      `,
+          )
+          .join("");
+
+        renderSummary();
+      }
+
+      // Remove item
+      function removeItem(id) {
+        const item = items.find((i) => i.id === id);
+        items = items.filter((i) => i.id !== id);
+
+        if (item) {
+          const checkbox = document.getElementById(`item-${item.name}`);
+          if (checkbox) {
+            checkbox.checked = false;
+          }
+        }
+
+        renderSelectedItems();
+      }
+
+      // Update qty
+      function updateQty(id, qty) {
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item.qty = parseFloat(qty) || 1;
+          renderSummary();
+        }
+      }
+
+      // Update unit
+      function updateUnit(id, unit) {
+        const item = items.find((i) => i.id === id);
+        if (item) {
+          item.unit = unit;
+          renderSummary();
+        }
+      }
+
+      // Render summary
+      function renderSummary() {
+        const container = document.getElementById("summary-items");
+
+        if (items.length === 0) {
+          container.innerHTML =
+            '<p style="text-align:center;color:#999;margin:0;">Add items to see summary</p>';
+          return;
+        }
+
+        container.innerHTML = items
+          .map(
+            (item) => `
+        <div class="summary-item">
+          <div class="item-name">✓ ${item.name}</div>
+          <div class="item-detail">${item.qty} ${item.unit}</div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      // Save for later
+      async function saveForLater() {
+        const title = document.getElementById("list-title").value.trim();
+        if (!title) {
+          alert("Please enter a list title!");
+          return;
+        }
+
+        if (items.length === 0) {
+          alert("Please add at least one item!");
+          return;
+        }
+
+        const res = await fetch("/api/groceries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            list_type: "drafts",
+            title,
+            items,
+            status: "Pending",
+          }),
+        });
+
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (data.ok) {
+          alert("List saved to drafts!");
+          backToDashboard();
+        } else {
+          alert(data.message || "Failed to save");
+        }
+      }
+
+      // Send list
+      async function sendList() {
+        const title = document.getElementById("list-title").value.trim();
+        const receiverId = document.getElementById("receiver-name").value;
+
+        if (!title) {
+          alert("Please enter a list title!");
+          return;
+        }
+        if (!receiverId) {
+          alert("Please select a receiver!");
+          return;
+        }
+
+        if (items.length === 0) {
+          alert("Please add at least one item!");
+          return;
+        }
+
+        // Step 1: Create the list as draft first
+        const createRes = await fetch("/api/groceries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            list_type: "drafts",
+            title,
+            items,
+            status: "Pending",
+          }),
+        });
+
+        const createData = await createRes.json().catch(() => ({ ok: false }));
+        if (!createData.ok) {
+          alert("Failed to create list");
+          return;
+        }
+
+        // Step 2: Get the latest draft list
+        const listsRes = await fetch("/api/groceries/drafts");
+        const listsData = await listsRes.json().catch(() => ({ ok: false }));
+
+        if (!listsData.ok || !listsData.lists || listsData.lists.length === 0) {
+          alert("List created but could not find it to send");
+          return;
+        }
+
+        const latestList = listsData.lists[0];
+
+        // Step 3: Send the list
+        const sendRes = await fetch(`/api/groceries/send/${latestList.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ receiver_id: receiverId }),
+        });
+
+        const sendData = await sendRes.json().catch(() => ({ ok: false }));
+        if (sendData.ok) {
+          alert("List sent successfully! ✓");
+          backToDashboard();
+        } else {
+          alert(sendData.message || "Failed to send list");
+        }
+      }
+
+      // Logout
+      async function logout() {
+        await fetch("/api/logout", { method: "POST" });
+        window.location.href = "login.html";
+      }
+
+      // Init
+      init();
+      setTimeout(() => renderCatalog(), 500);
+    </script>
+  </body>
+</html>

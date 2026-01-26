@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact & Feedback - Grocery Lists</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #f5f5f5;
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .feedback-container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 3px solid #ff0057;
+        padding-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #ff0057;
+        margin: 0 0 10px 0;
+        font-size: 2em;
+      }
+
+      .header p {
+        color: #666;
+        margin: 0;
+        font-size: 1em;
+      }
+
+      .back-btn {
+        background: #999;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: 0.3s;
+        font-weight: bold;
+      }
+
+      .back-btn:hover {
+        background: #777;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #333;
+        font-size: 1em;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 1em;
+        font-family: Roboto, sans-serif;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #ff0057;
+        box-shadow: 0 0 5px rgba(255, 0, 87, 0.2);
+      }
+
+      .form-group textarea {
+        height: 120px;
+        resize: vertical;
+      }
+
+      .rating-group {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .star {
+        font-size: 2.5em;
+        cursor: pointer;
+        transition: transform 0.2s;
+        opacity: 0.3;
+        user-select: none;
+      }
+
+      .star:hover,
+      .star.active {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+
+      .data-privacy {
+        background: #e8f4f8;
+        border-left: 4px solid #32cd32;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 25px;
+        font-size: 0.95em;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .data-privacy strong {
+        color: #32cd32;
+      }
+
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .checkbox-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      .checkbox-item label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: normal;
+      }
+
+      .submit-btn {
+        background: linear-gradient(45deg, #32cd32, #228b22);
+        color: white;
+        padding: 14px 30px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: bold;
+        width: 100%;
+        transition: 0.3s;
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(50, 205, 50, 0.3);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .response-message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        display: none;
+      }
+
+      .response-message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #28a745;
+        display: block;
+      }
+
+      .response-message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+        display: block;
+      }
+
+      .required {
+        color: #ff0057;
+      }
+
+      .divider {
+        height: 2px;
+        background: linear-gradient(to right, #ff0057, transparent);
+        margin: 30px 0;
+      }
+
+      .section-title {
+        color: #ff0057;
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      @media (max-width: 600px) {
+        .feedback-container {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 1.5em;
+        }
+
+        .star {
+          font-size: 2em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="feedback-container">
+      <button class="back-btn" onclick="goBack()">← Back to Home</button>
+
+      <div class="header">
+        <h1>💬 Contact & Feedback</h1>
+        <p>Help us improve by sharing your thoughts</p>
+      </div>
+
+      <div class="data-privacy">
+        <strong>🔒 Your Data is Safe:</strong> All feedback and ratings are
+        saved only for future visualizations and improvements. Your data will
+        <strong>NEVER be shared</strong> with anyone. We use it only to make the
+        app better for you.
+      </div>
+
+      <form id="feedback-form">
+        <!-- RATING SECTION -->
+        <div class="section-title">⭐ Rate Your Experience</div>
+        <div class="form-group">
+          <label
+            >How satisfied are you with the app?
+            <span class="required">*</span></label
+          >
+          <div class="rating-group" id="rating-group">
+            <span class="star" data-rating="1">⭐</span>
+            <span class="star" data-rating="2">⭐</span>
+            <span class="star" data-rating="3">⭐</span>
+            <span class="star" data-rating="4">⭐</span>
+            <span class="star" data-rating="5">⭐</span>
+          </div>
+          <input type="hidden" id="rating" name="rating" value="0" required />
+        </div>
+
+        <!-- IMPROVEMENTS SECTION -->
+        <div class="divider"></div>
+        <div class="section-title">🎯 What Can We Improve?</div>
+        <div class="form-group">
+          <label>Select areas for improvement:</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-ui"
+                name="improvements"
+                value="UI/Design"
+              />
+              <label for="improve-ui">UI/Design & Appearance</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-speed"
+                name="improvements"
+                value="Speed"
+              />
+              <label for="improve-speed">Speed & Performance</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-features"
+                name="improvements"
+                value="Features"
+              />
+              <label for="improve-features">New Features</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-mobile"
+                name="improvements"
+                value="Mobile"
+              />
+              <label for="improve-mobile">Mobile Experience</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-docs"
+                name="improvements"
+                value="Documentation"
+              />
+              <label for="improve-docs">Help & Documentation</label>
+            </div>
+            <div class="checkbox-item">
+              <input
+                type="checkbox"
+                id="improve-other"
+                name="improvements"
+                value="Other"
+              />
+              <label for="improve-other">Something Else</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTACT SECTION -->
+        <div class="divider"></div>
+        <div class="section-title">📧 Your Contact Info</div>
+        <div class="form-group">
+          <label>Email Address <span class="required">*</span></label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="your@email.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Type of Feedback <span class="required">*</span></label>
+          <select id="type" name="type" required>
+            <option value="">-- Select Type --</option>
+            <option value="bug">🐛 Bug Report</option>
+            <option value="feature">💡 Feature Request</option>
+            <option value="improvement">✨ Improvement Suggestion</option>
+            <option value="feedback">📝 General Feedback</option>
+            <option value="other">❓ Other</option>
+          </select>
+        </div>
+
+        <!-- MESSAGE SECTION -->
+        <div class="divider"></div>
+        <div class="form-group">
+          <label>Your Message <span class="required">*</span></label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Tell us what you think... What worked? What didn't? What would help?"
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Send Feedback</button>
+        <div class="response-message" id="response-message"></div>
+      </form>
+    </div>
+
+    <script>
+      // Rating system
+      let selectedRating = 0;
+
+      document.querySelectorAll(".star").forEach((star) => {
+        star.addEventListener("click", (e) => {
+          selectedRating = parseInt(e.target.dataset.rating);
+          document.getElementById("rating").value = selectedRating;
+
+          // Update stars display
+          document.querySelectorAll(".star").forEach((s, index) => {
+            if (index + 1 <= selectedRating) {
+              s.classList.add("active");
+            } else {
+              s.classList.remove("active");
+            }
+          });
+        });
+
+        // Hover effect
+        star.addEventListener("mouseover", (e) => {
+          const hoverRating = parseInt(e.target.dataset.rating);
+          document.querySelectorAll(".star").forEach((s, index) => {
+            if (index + 1 <= hoverRating) {
+              s.style.opacity = "1";
+            } else {
+              s.style.opacity = "0.3";
+            }
+          });
+        });
+      });
+
+      document
+        .getElementById("rating-group")
+        .addEventListener("mouseleave", () => {
+          document.querySelectorAll(".star").forEach((s, index) => {
+            if (index + 1 <= selectedRating) {
+              s.style.opacity = "1";
+            } else {
+              s.style.opacity = "0.3";
+            }
+          });
+        });
+
+      // Form submission
+      document
+        .getElementById("feedback-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const rating = document.getElementById("rating").value;
+          const email = document.getElementById("email").value;
+          const type = document.getElementById("type").value;
+          const message = document.getElementById("message").value;
+
+          // Get selected improvements
+          const improvements = [];
+          document
+            .querySelectorAll('input[name="improvements"]:checked')
+            .forEach((checkbox) => {
+              improvements.push(checkbox.value);
+            });
+
+          if (!rating) {
+            showMessage("Please select a rating!", "error");
+            return;
+          }
+
+          const submitBtn = document.querySelector(".submit-btn");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending...";
+
+          const data = {
+            rating: parseInt(rating),
+            improvements: improvements,
+            email: email,
+            type: type,
+            message: message,
+          };
+
+          try {
+            const res = await fetch("/api/feedback", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+
+            if (result.ok) {
+              showMessage(
+                "✅ Thank you! Your feedback helps us improve.",
+                "success",
+              );
+              document.getElementById("feedback-form").reset();
+              selectedRating = 0;
+              document.querySelectorAll(".star").forEach((s) => {
+                s.classList.remove("active");
+                s.style.opacity = "0.3";
+              });
+
+              // Reset button
+              setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Send Feedback";
+              }, 1000);
+            } else {
+              showMessage(
+                "❌ Error: " + (result.message || "Failed to send feedback"),
+                "error",
+              );
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Send Feedback";
+            }
+          } catch (error) {
+            showMessage("❌ Connection error. Please try again.", "error");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Send Feedback";
+          }
+        });
+
+      function showMessage(message, type) {
+        const messageEl = document.getElementById("response-message");
+        messageEl.textContent = message;
+        messageEl.className = "response-message " + type;
+
+        if (type === "success") {
+          setTimeout(() => {
+            messageEl.className = "response-message";
+          }, 5000);
+        }
+      }
+
+      function goBack() {
+        window.location.href = "home.html";
+      }
+    </script>
+  </body>
+</html>

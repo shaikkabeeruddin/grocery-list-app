@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="CodeHim" />
+    <title>Forgot Password - Grocery List App</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/demo.css') }}"
+    />
+  </head>
+  <body>
+    <div class="ring" id="ring">
+      <i style="--clr: #00ff0a"></i>
+      <i style="--clr: #ff0057"></i>
+      <i style="--clr: #fffd44"></i>
+
+      <!-- Step 1 -->
+      <div class="login" id="loginForm">
+        <h2
+          style="
+            color: #ff0057;
+            font-family:
+              &quot;Gill Sans&quot;, &quot;Gill Sans MT&quot;, Calibri,
+              &quot;Trebuchet MS&quot;, sans-serif;
+          "
+        >
+          Forgot Password
+        </h2>
+        <form id="emailForm">
+          <div class="inputBx">
+            <input
+              type="email"
+              id="email"
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+          <div class="inputBx">
+            <input type="submit" value="Send Reset Code" />
+          </div>
+        </form>
+        <div class="links">
+          <a href="login.html" style="color: blue">Back to Login</a>
+        </div>
+        <p>Go paperless save trees with digital grocery lists!</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="login" id="codeForm" style="display: none">
+        <h2
+          style="
+            color: #ff0057;
+            font-family:
+              &quot;Gill Sans&quot;, &quot;Gill Sans MT&quot;, Calibri,
+              &quot;Trebuchet MS&quot;, sans-serif;
+          "
+        >
+          Enter Code
+        </h2>
+        <p id="sentEmail"></p>
+        <form id="codeVerifyForm">
+          <div class="inputBx">
+            <input
+              type="text"
+              id="resetCode"
+              placeholder="Enter 6-digit code"
+              maxlength="6"
+              required
+            />
+          </div>
+          <div class="inputBx"><input type="submit" value="Verify Code" /></div>
+        </form>
+        <div class="links">
+          <a href="forgot.html" style="color: blue">Resend Code</a>
+          <a href="login.html" style="color: blue">Back to Login</a>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="login" id="newPassForm" style="display: none">
+        <h2
+          style="
+            color: #ff0057;
+            font-family:
+              &quot;Gill Sans&quot;, &quot;Gill Sans MT&quot;, Calibri,
+              &quot;Trebuchet MS&quot;, sans-serif;
+          "
+        >
+          New Password
+        </h2>
+        <form id="newPassFormSubmit">
+          <div class="inputBx">
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="New Password"
+              minlength="6"
+              required
+            />
+          </div>
+          <div class="inputBx">
+            <input
+              type="password"
+              id="confirmNewPass"
+              placeholder="Confirm New Password"
+              required
+            />
+          </div>
+          <div class="inputBx">
+            <input type="submit" value="Reset Password" />
+          </div>
+        </form>
+        <div class="links">
+          <a href="login.html" style="color: blue">Back to Login</a>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="login" id="resetSuccess" style="display: none">
+        <h2 style="color: #32cd32">Password Reset!</h2>
+        <p id="resetSuccessMsg"></p>
+        <div class="inputBx">
+          <input
+            type="button"
+            value="Go to Login"
+            onclick="window.location.href = 'login.html'"
+            style="
+              background: linear-gradient(45deg, #32cd32, #228b22);
+              border: none;
+            "
+          />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showError(msg) {
+        alert(msg);
+      }
+
+      document
+        .getElementById("emailForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value.trim();
+
+          const res = await fetch("/api/forgot/request", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res
+            .json()
+            .catch(() => ({ ok: false, message: "Failed" }));
+
+          if (!data.ok) {
+            showError(data.message || "No account found with this email!");
+            return;
+          }
+
+          // Demo: show code because we are not sending real emails yet
+          alert(`Demo reset code: ${data.code}`);
+
+          document.getElementById("sentEmail").textContent =
+            `Code sent to ${email}`;
+          document.getElementById("loginForm").style.display = "none";
+          document.getElementById("codeForm").style.display = "flex";
+        });
+
+      document
+        .getElementById("codeVerifyForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const code = document.getElementById("resetCode").value.trim();
+
+          const res = await fetch("/api/forgot/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code }),
+          });
+          const data = await res
+            .json()
+            .catch(() => ({ ok: false, message: "Failed" }));
+
+          if (!data.ok) {
+            showError(data.message || "Wrong code! Try again.");
+            return;
+          }
+
+          document.getElementById("codeForm").style.display = "none";
+          document.getElementById("newPassForm").style.display = "flex";
+        });
+
+      document
+        .getElementById("newPassFormSubmit")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const newPassword = document.getElementById("newPassword").value;
+          const confirmNewPass =
+            document.getElementById("confirmNewPass").value;
+
+          if (newPassword.length < 6) {
+            showError("Password must be at least 6 characters!");
+            return;
+          }
+          if (newPassword !== confirmNewPass) {
+            showError("Passwords do not match!");
+            return;
+          }
+
+          const res = await fetch("/api/forgot/reset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newPassword, confirmNewPass }),
+          });
+          const data = await res
+            .json()
+            .catch(() => ({ ok: false, message: "Failed" }));
+
+          if (!data.ok) {
+            showError(data.message || "Reset failed!");
+            return;
+          }
+
+          document.getElementById("newPassForm").style.display = "none";
+          document.getElementById("resetSuccess").style.display = "flex";
+          document.getElementById("resetSuccessMsg").textContent =
+            "Password updated successfully.";
+        });
+    </script>
+  </body>
+</html>

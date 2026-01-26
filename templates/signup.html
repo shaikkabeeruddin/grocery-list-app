@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="CodeHim" />
+    <title>Signup - Grocery List App</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/demo.css') }}"
+    />
+  </head>
+  <body>
+    <div class="ring" id="ring">
+      <i style="--clr: #00ff0a"></i>
+      <i style="--clr: #ff0057"></i>
+      <i style="--clr: #fffd44"></i>
+
+      <div class="login" id="signupForm">
+        <h2
+          style="
+            color: #ff0057;
+            font-family:
+              &quot;Gill Sans&quot;, &quot;Gill Sans MT&quot;, Calibri,
+              &quot;Trebuchet MS&quot;, sans-serif;
+          "
+        >
+          Create Account
+        </h2>
+
+        <form id="signupFormSubmit">
+          <div class="inputBx">
+            <input
+              type="text"
+              id="newUsername"
+              placeholder="Username"
+              required
+            />
+          </div>
+          <div class="inputBx">
+            <input type="email" id="newEmail" placeholder="Email" required />
+          </div>
+          <div class="inputBx">
+            <input
+              type="password"
+              id="newPassword"
+              placeholder="Password (min 6 chars)"
+              required
+            />
+          </div>
+          <div class="inputBx">
+            <input
+              type="password"
+              id="confirmPassword"
+              placeholder="Confirm Password"
+              required
+            />
+          </div>
+          <div class="inputBx"><input type="submit" value="Sign Up" /></div>
+        </form>
+
+        <div class="links">
+          <a href="login.html" style="color: blue">Back to Login</a>
+        </div>
+        <p>Go paperless save trees with digital grocery lists!</p>
+      </div>
+
+      <div class="login" id="signupSuccess" style="display: none">
+        <h2 style="color: #32cd32">Account Created!</h2>
+        <p id="successMsg"></p>
+        <div class="inputBx">
+          <input
+            type="button"
+            value="Go to Login"
+            onclick="window.location.href = 'login.html'"
+            style="
+              background: linear-gradient(45deg, #32cd32, #228b22);
+              border: none;
+            "
+          />
+        </div>
+      </div>
+
+      <div
+        id="errorMsg"
+        style="
+          position: absolute;
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(255, 0, 0, 0.9);
+          color: #fff;
+          padding: 10px 20px;
+          border-radius: 20px;
+          display: none;
+          z-index: 1000;
+        "
+      ></div>
+    </div>
+
+    <script>
+      function showError(msg) {
+        const errorDiv = document.getElementById("errorMsg");
+        errorDiv.textContent = msg;
+        errorDiv.style.display = "block";
+        setTimeout(() => (errorDiv.style.display = "none"), 4000);
+      }
+
+      document
+        .getElementById("signupFormSubmit")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const username = document.getElementById("newUsername").value.trim();
+          const email = document.getElementById("newEmail").value.trim();
+          const password = document.getElementById("newPassword").value;
+          const confirm = document.getElementById("confirmPassword").value;
+
+          if (!username || !email || !password) {
+            showError("Please fill all fields!");
+            return;
+          }
+          if (password.length < 6) {
+            showError("Password must be at least 6 characters!");
+            return;
+          }
+          if (password !== confirm) {
+            showError("Passwords do not match!");
+            return;
+          }
+
+          const res = await fetch("/api/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password, confirm }),
+          });
+
+          const data = await res
+            .json()
+            .catch(() => ({ ok: false, message: "Signup failed" }));
+
+          if (!data.ok) {
+            showError(data.message || "Signup failed!");
+            return;
+          }
+
+          document.getElementById("signupForm").style.display = "none";
+          document.getElementById("signupSuccess").style.display = "flex";
+          document.getElementById("successMsg").textContent =
+            `Welcome, ${username}! Account created successfully.`;
+        });
+    </script>
+  </body>
+</html>
