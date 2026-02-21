@@ -976,11 +976,28 @@
           position: static;
         }
       }
-      .received-lists {
-  max-height: 400px;      
-  overflow-y: auto;       
-  padding-right: 10px;    
+     .received-scroll-container {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
 }
+
+/* Pretty scrollbar */
+.received-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+.received-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.received-scroll-container::-webkit-scrollbar-thumb {
+  background: #ff0057;
+  border-radius: 10px;
+}
+.received-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #cc0044;
+}
+
 
     </style>
   </head>
@@ -1033,9 +1050,12 @@
         <div class="lists-grid" id="sent-lists"></div>
       </div>
 
-      <div id="received-view" class="tab-content" style="display: none">
-        <div class="lists-grid" id="received-lists"></div>
-      </div>
+      <div id="received-view" class="tab-content" style="display: none;">
+  <div class="received-scroll-container">
+    <div class="lists-grid" id="received-lists"></div>
+  </div>
+</div>
+
 
       <div id="drafts-view" class="tab-content" style="display: none">
         <div class="lists-grid" id="drafts-lists"></div>
