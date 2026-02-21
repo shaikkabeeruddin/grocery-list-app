@@ -976,29 +976,6 @@
           position: static;
         }
       }
-     .received-scroll-container {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-/* Pretty scrollbar */
-.received-scroll-container::-webkit-scrollbar {
-  width: 8px;
-}
-.received-scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-.received-scroll-container::-webkit-scrollbar-thumb {
-  background: #ff0057;
-  border-radius: 10px;
-}
-.received-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #cc0044;
-}
-
-
     </style>
   </head>
   <body>
@@ -1050,12 +1027,9 @@
         <div class="lists-grid" id="sent-lists"></div>
       </div>
 
-      <div id="received-view" class="tab-content" style="display: none;">
-  <div class="received-scroll-container">
-    <div class="lists-grid" id="received-lists"></div>
-  </div>
-</div>
-
+      <div id="received-view" class="tab-content" style="display: none">
+        <div class="lists-grid" id="received-lists"></div>
+      </div>
 
       <div id="drafts-view" class="tab-content" style="display: none">
         <div class="lists-grid" id="drafts-lists"></div>
@@ -1167,7 +1141,6 @@
 
         if (data.ok) {
           catalog = data.catalog;
-          renderCatalog()
         }
       }
 
@@ -1410,7 +1383,7 @@
         });
 
         const viewHTML = `
-          <div style="max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px;">
+          <div style="max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; max-height:100vh; overflow-y:auto">
             <button class="back-btn" onclick="backToDashboard()" style="margin-bottom: 20px;">← Back</button>
             
             <h2 style="color: #ff0057; margin-top: 0;">${list.title}</h2>
